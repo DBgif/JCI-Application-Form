@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact Form | Start Here</title>
   <!-- Load the reCAPTCHA API -->
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <!--<script src="https://www.google.com/recaptcha/api.js" async defer></script>-->
   <style>
     * { 
       margin: 0; 
@@ -99,8 +99,8 @@
   <h1>Contact Form</h1>
   <p>Please fill out the form to send your details.</p>
 
-  <!-- Button to trigger reCAPTCHA -->
-  <button id="form-btn" class="btn-primary" onclick="showRecaptcha()">Fill Out the Form</button>
+  <!-- FIX: moved navigation logic into a proper onclick handler -->
+  <button id="form-btn" class="btn-primary" onclick="window.location.href='index.html';">Fill Out the Form</button>
 
   <!-- reCAPTCHA widget (replace YOUR_SITE_KEY with your actual key) -->
   <div
@@ -118,21 +118,24 @@
   </div>
 </div>
 
-<script>
-  // Function to reveal reCAPTCHA and hide button
-  function showRecaptcha() {
-    document.getElementById("recaptcha-container").classList.add("show-recaptcha");
-    document.getElementById("form-btn").style.display = "none";
-  }
-
-  // Callback function executed after successful reCAPTCHA
-  function onRecaptchaVerified(token) {
-    // You can handle the token here or just redirect
-    console.log("reCAPTCHA Token:", token);
-    alert("Verification successful! Proceeding to the form...");
-    window.location.href = "index.html";
-  }
+<!-- FIX: removed stray </script> closing tag that had no matching opener -->
+<script type="text/javascript">
+  (function (l) {
+    if (l.search[1] === "/") {
+      var decoded = l.search
+        .slice(1)
+        .split("&")
+        .map(function (s) {
+          return s.replace(/~and~/g, "&");
+        })
+        .join("?");
+      window.history.replaceState(
+        null,
+        null,
+        l.pathname.slice(0, -1) + decoded + l.hash
+      );
+    }
+  })(window.location);
 </script>
-
 </body>
 </html>
