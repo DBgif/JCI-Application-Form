@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Add this in your <head>, replace YOUR_SITE_KEY -->
+<!--<script src="https://www.google.com/recaptcha/api.js?render=YOUR_SITE_KEY"></script>-->
+  <title>JCI Applicant Form</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d7ddea;
+      --accent: #0f4c81;
+      --accent2: #1d6fa5;
+      --soft: #eef6ff;
+      --shadow: 0 12px 30px rgba(15,23,42,.08);
+    }
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, #eef3f9 0%, #f7f9fc 100%);
+      color: var(--text);
+    }
+    .page { max-width: 1180px; margin: 0 auto; padding: 28px 18px 40px; }
+    .form-card {
+      background: var(--card);
+      border: 1px solid rgba(15,76,129,.12);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .header-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+    /* Hidden Admin Toggle - Only visible to admins */
+    .admin-toggle {
+      display: none !important;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(220,38,38,.4);
+      transition: all .2s;
+    }
+    .admin-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(220,38,38,.5);
+    }
+    .admin-toggle.show {
+      display: inline-flex !important;
+      animation: adminSlideIn 0.3s ease-out;
+    }
+    @keyframes adminSlideIn {
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .admin-status {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: rgba(34,197,94,.95);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 9998;
+      opacity: 0;
+      transform: translateX(100px);
+      transition: all .3s;
+    }
+    .admin-status.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      line-height: 1.15;
+      color: var(--accent);
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+      line-height: 1.2;
+      color: var(--accent);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--soft);
+    }
+    section {
+      margin-bottom: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+    .grid { display: grid; gap: 14px; }
+    .two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #344054;
+    }
+    input, textarea {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, transform .05s;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 4px rgba(29,111,165,.12);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+    input::placeholder, textarea::placeholder {
+      color: #9aa3af;
+      font-weight: 400;
+    }
+    .checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-top: 4px;
+    }
+    .checks label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      color: #374151;
+      background: #fafcff;
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      border-radius: 999px;
+    }
+    .checks input { width: auto; margin: 0; }
+    .wrap { align-items: flex-start; }
+    .edu-row, .ref-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .ref-row { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .field { margin-top: 12px; }
+    .field > span {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #344054;
+    }
+    .checkline {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-weight: 500;
+      color: #374151;
+      background: #fafcff;
+      border: 1px solid var(--line);
+      padding: 14px;
+      border-radius: 12px;
+    }
+    .checkline input { width: auto; margin-top: 3px; }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    button, .button-link {
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 18px rgba(15,76,129,.18);
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+    }
+    button:hover, .button-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(15,76,129,.22);
+    }
+    .secondary {
+      background: #edf2f7;
+      color: #1f2937;
+      box-shadow: none;
+      border: 1px solid var(--line);
+    }
+    .secondary:hover {
+      box-shadow: 0 8px 18px rgba(15,23,42,.08);
+    }
+    @media (max-width: 900px) {
+      .two, .edu-row, .ref-row { grid-template-columns: 1fr; }
+      .header-actions { flex-direction: column; align-items: flex-end; }
+    }
+    @media (max-width: 640px) {
+      .page { padding: 14px; }
+      .form-card { padding: 18px; border-radius: 14px; }
+      h1 { font-size: 24px; }
+      section { padding: 14px; }
+      .checks label { width: 100%; border-radius: 12px; }
+      .actions button, .button-link { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Hidden Admin Toggle Button (Only shows for verified admins) -->
+    <button type="button" class="admin-toggle" id="adminToggle">
+      🛡️ Admin Dashboard
+    </button>
+    
+    <!-- Admin Status Indicator -->
+    <div class="admin-status" id="adminStatus">
+      Admin Mode Active
+    </div>
+
+    <!-- JCI Applicant Form -->
+    <form id="jciForm" class="form-card" action="/submit" method="POST">
+      <h1>JCI New Applicant Form</h1>
+
+      <section>
+  <h2>I. Personal Information</h2>
+  <div class="grid two">
+    <label>Full Name<input name="fullName" type="text" required></label>
+    <label>Nickname<input name="nickname" type="text"></label>
+    <label>Date of Birth<input name="dob" type="date"></label>
+    <label>Age<input name="age" type="number" min="0"></label>
+    <label>Civil Status<input name="civilStatus" type="text"></label>
+    <label>Gender
+      <div class="checks">
+        <label><input type="radio" name="gender" value="Male"> Male</label>
+        <label><input type="radio" name="gender" value="Female"> Female</label>
+        <label><input type="radio" name="gender" value="Other"> Other</label>
+      </div>
+    </label>
+    <label>Nationality
+      <select name="nationality">
+        <option value="">Select Nationality</option>
+        <option value="Filipino">Filipino</option>
+        <option value="American">American</option>
+        <option value="Chinese">Chinese</option>
+        <option value="Japanese">Japanese</option>
+        <option value="Korean">Korean</option>
+        <option value="Other">Other</option>
+      </select>
+    </label>
+    <label>Address<input name="address" type="text"></label>
+    <label>Mobile Number<input name="mobile" type="tel" required pattern="[0-9]{10,11}" title="Please enter 10–11 digits (e.g., 09171234567)"></label>
+    <label>Email Address<input name="email" type="email" required></label>
+    <label>Profession / Occupation<input name="occupation" type="text"></label>
+    <label>Company / Organization<input name="company" type="text"></label>
+  </div>
+  <div class="field">
+    <span>Employment Status</span>
+    <div class="checks">
+      <label><input type="radio" name="employmentStatus" value="Student"> Student</label>
+      <label><input type="radio" name="employmentStatus" value="Employed"> Employed</label>
+      <label><input type="radio" name="employmentStatus" value="Self-Employed"> Self‑Employed</label>
+      <label><input type="radio" name="employmentStatus" value="Business Owner"> Business Owner</label>
+    </div>
+  </div>
+</section>
+
+      <section>
+        <h2>II. Educational Background</h2>
+        <div id="educationWrap">
+          <div class="edu-row">
+            <input name="eduLevel[]" placeholder="Level">
+            <input name="eduSchool[]" placeholder="School">
+            <input name="eduCourse[]" placeholder="Course / Strand">
+            <input name="eduYear[]" placeholder="Year Graduated">
+          </div>
+        </div>
+        <button type="button" class="secondary" id="addEdu">+ Add Education Row</button>
+      </section>
+
+      <section>
+        <h2>III. Professional / Business Background</h2>
+        <div class="grid two">
+          <label>Current Position / Role<input name="currentRole" type="text"></label>
+          <label>Years in Profession / Business<input name="yearsInProfession" type="text"></label>
+          <label class="full">Company / Business Name<input name="businessName" type="text"></label>
+        </div>
+        <label>Key Skills / Expertise<textarea name="skills" rows="4"></textarea></label>
+      </section>
+
+      <section>
+        <h2>IV. Leadership and Community Involvement</h2>
+        <label>Organizations / Affiliations<textarea name="organizations" rows="3"></textarea></label>
+        <label>Community Service / Volunteer Experience<textarea name="volunteer" rows="3"></textarea></label>
+        <label>Leadership Experience<textarea name="leadership" rows="3"></textarea></label>
+      </section>
+
+      <section>
+        <h2>V. Why Do You Want to Join JCI?</h2>
+        <label><textarea name="whyJoin" rows="4"></textarea></label>
+      </section>
+
+      <section>
+        <h2>VI. Areas of Interest in JCI</h2>
+        <div class="checks wrap">
+          <label><input type="checkbox" name="interest[]" value="Leadership Development"> Leadership Development</label>
+          <label><input type="checkbox" name="interest[]" value="Community Projects"> Community Projects</label>
+          <label><input type="checkbox" name="interest[]" value="Business Networking"> Business Networking</label>
+          <label><input type="checkbox" name="interest[]" value="Training & Public Speaking"> Training & Public Speaking</label>
+          <label><input type="checkbox" name="interest[]" value="Social Impact Programs"> Social Impact Programs</label>
+          <label><input type="checkbox" name="interest[]" value="International Opportunities"> International Opportunities</label>
+          <label><input type="checkbox" name="interest[]" value="Other"> Other</label>
+          <input name="otherInterest" placeholder="Other: specify here">
+        </div>
+      </section>
+
+      <section>
+        <h2>VII. Personal Vision Statement</h2>
+        <label><textarea name="vision" rows="4"></textarea></label>
+      </section>
+
+      <section>
+        <h2>VIII. Character References / JCI Endorsers</h2>
+        <div id="refsWrap">
+          <div class="ref-row">
+            <input name="refName[]" placeholder="Name">
+            <input name="refPosition[]" placeholder="Position">
+            <input name="refContact[]" placeholder="Contact Number">
+          </div>
+        </div>
+        <button type="button" class="secondary" id="addRef">+ Add Reference Row</button>
+      </section>
+
+      <section>
+        <h2>IX. Applicant Declaration</h2>
+        <label class="checkline">
+          <input name="declare" type="checkbox" required>
+          I certify that the information provided above is true and correct to the best of my knowledge.
+        </label>
+        <div class="grid two">
+          <label>Applicant Signature<input name="signature" type="text"></label>
+          <label>Date<input name="date" type="date"></label>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button type="submit" id="submitBtn">Submit Application</button>
+        <button type="reset" class="secondary">Clear</button>
+      </div>
+    </form>
+  </div>
+
+ <script type="module">
+  // 1. Import Firebase modules
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    addDoc,
+    collection,
+    getDoc,
+  } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+  } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+
+  // 2. Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDo8zyDjgqzR9bvGXVDLKgMu7qZldBDFUU",
+    authDomain: "contact-4e3df.firebaseapp.com",
+    projectId: "contact-4e3df",
+    storageBucket: "contact-4e3df.firebasestorage.app",
+    messagingSenderId: "869674483397",
+    appId: "1:869674483397:web:4abc3057f810328ae03aac",
+    measurementId: "G-ZRV7EWGH0K",
+  };
+
+  // 3. Initialize Firebase services
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  const form = document.getElementById("jciForm");
+  if (!form) {
+    console.error("Form #jciForm not found");
+  }
+  let debounceTimer = null;
+
+  // Admin UI elements
+  const adminToggle = document.getElementById("adminToggle");
+  const adminStatus = document.getElementById("adminStatus");
+
+  // Watch auth state (persists on refresh)
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      adminToggle.classList.add("show");
+      adminStatus.classList.add("show");
+      adminStatus.textContent = `Admin: ${user.email}`;
+    } else {
+      adminToggle.classList.remove("show");
+      adminStatus.classList.remove("show");
+    }
+  });
+
+  // Admin login shortcut: Ctrl+Shift+R
+  document.addEventListener("keydown", async function (e) {
+    // Note: some browsers may block this shortcut
+    if (e.ctrlKey && e.shiftKey && e.key === "R") {
+      e.preventDefault();
+
+      const email = prompt("🔐 Admin Email:");
+      if (!email) return;
+      const password = prompt("🔐 Admin Password:");
+      if (!password) return;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("✅ Admin access granted!");
+      } catch (err) {
+        if (err.code === "auth/user-not-found")
+          alert("❌ Email not found.");
+        else if (err.code === "auth/wrong-password")
+          alert("❌ Wrong password.");
+        else if (err.code === "auth/invalid-email")
+          alert("❌ Invalid email format.");
+        else alert("❌ Login failed: " + err.message);
+      }
+    }
+  });
+
+  // Admin button → open dashboard
+  adminToggle.addEventListener("click", () => {
+    window.open("Dashboard.html", "_blank");
+  });
+
+  // 4. Autosave logic (with session ID)
+
+  let sessionId = sessionStorage.getItem("jciSessionId");
+  if (!sessionId) {
+    sessionId = "draft_" + Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem("jciSessionId", sessionId);
+  }
+
+  async function autosaveData() {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // Education as array of objects
+    data.education = Array.from(
+      document.querySelectorAll(".edu-row")
+    ).map((r) => {
+      const inputs = r.querySelectorAll("input");
+      return {
+        level: inputs[0]?.value || "",
+        school: inputs[1]?.value || "",
+        course: inputs[2]?.value || "",
+        year: inputs[3]?.value || "",
+      };
+    });
+
+    // References as array of objects
+    data.references = Array.from(
+      document.querySelectorAll(".ref-row")
+    ).map((r) => {
+      const inputs = r.querySelectorAll("input");
+      return {
+        name: inputs[0]?.value || "",
+        position: inputs[1]?.value || "",
+        contact: inputs[2]?.value || "",
+      };
+    });
+
+    // Checkbox “interest[]” array
+    data.interest = Array.from(
+      form.querySelectorAll('input[name="interest[]"]:checked')
+    ).map((cb) => cb.value);
+
+    const otherInterestInput = form.querySelector('input[name="otherInterest"]');
+    const otherInterest = otherInterestInput?.value ?? "";
+    if (otherInterest && data.interest.includes("Other")) {
+      data.interest.push(otherInterest);
+    }
+
+    try {
+      await setDoc(doc(db, "applicants", sessionId), data);
+      console.log("Draft auto‑saved for session:", sessionId);
+    } catch (e) {
+      console.error("Autosave error:", e);
+    }
+  }
+
+  // Restore draft on load
+  async function restoreDraft() {
+    if (!form) return;
+
+    try {
+      const draftRef = doc(db, "applicants", sessionId);
+      const snap = await getDoc(draftRef);
+
+      if (!snap.exists()) return;
+
+      const data = snap.data();
+
+      // Fill simple fields (text, radio, etc.)
+      for (const [key, value] of Object.entries(data)) {
+        if (
+          key === "education" ||
+          key === "references" ||
+          key === "submittedAt"
+        ) {
+          continue;
+        }
+
+        const el = form.querySelector(`[name="${key}"]`);
+        if (!el) continue;
+
+        if (el.type === "radio") {
+          const radio = form.querySelector(
+            `[name="${key}"][value="${value}"]`
+          );
+          if (radio) radio.checked = true;
+        } else if (el.type === "checkbox") {
+          el.checked = !!value;
+        } else {
+          el.value = value || "";
+        }
+      }
+
+      // Restore education rows
+      const eduWrap = document.getElementById("educationWrap");
+      eduWrap.innerHTML = "";
+
+      if (Array.isArray(data.education) && data.education.length > 0) {
+        data.education.forEach((edu) => {
+          const row = document.createElement("div");
+          row.className = "edu-row";
+          row.innerHTML = `
+            <input name="eduLevel[]" placeholder="Level" value="${edu.level || ""}">
+            <input name="eduSchool[]" placeholder="School" value="${edu.school || ""}">
+            <input name="eduCourse[]" placeholder="Course / Strand" value="${edu.course || ""}">
+            <input name="eduYear[]" placeholder="Year Graduated" value="${edu.year || ""}">
+          `;
+          eduWrap.appendChild(row);
+        });
+      } else {
+        const row = document.createElement("div");
+        row.className = "edu-row";
+        row.innerHTML = `
+          <input name="eduLevel[]" placeholder="Level">
+          <input name="eduSchool[]" placeholder="School">
+          <input name="eduCourse[]" placeholder="Course / Strand">
+          <input name="eduYear[]" placeholder="Year Graduated">
+        `;
+        eduWrap.appendChild(row);
+      }
+
+      // Restore reference rows
+      const refsWrap = document.getElementById("refsWrap");
+      refsWrap.innerHTML = "";
+
+      if (Array.isArray(data.references) && data.references.length > 0) {
+        data.references.forEach((ref) => {
+          const row = document.createElement("div");
+          row.className = "ref-row";
+          row.innerHTML = `
+            <input name="refName[]" placeholder="Name" value="${ref.name || ""}">
+            <input name="refPosition[]" placeholder="Position" value="${ref.position || ""}">
+            <input name="refContact[]" placeholder="Contact Number" value="${ref.contact || ""}">
+          `;
+          refsWrap.appendChild(row);
+        });
+      } else {
+        const row = document.createElement("div");
+        row.className = "ref-row";
+        row.innerHTML = `
+          <input name="refName[]" placeholder="Name">
+          <input name="refPosition[]" placeholder="Position">
+          <input name="refContact[]" placeholder="Contact Number">
+        `;
+        refsWrap.appendChild(row);
+      }
+
+      console.log("✅ Draft restored for session:", sessionId);
+    } catch (e) {
+      console.error("Failed to restore draft:", e);
+    }
+  }
+
+  // Restore on DOM ready
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!form) return;
+    restoreDraft();
+  });
+
+  // Debounced autosave on user input
+  form.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(autosaveData, 1500);
+  });
+
+  // 5. Final submission
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById("submitBtn");
+    if (!submitBtn) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Application";
+      return;
+    }
+
+    const declare = form.querySelector('input[name="declare"]');
+    if (!declare || !declare.checked) {
+      alert("Please check the applicant declaration.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Application";
+      return;
+    }
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // Education as array of objects
+    data.education = Array.from(
+      document.querySelectorAll(".edu-row")
+    ).map((r) => {
+      const inputs = r.querySelectorAll("input");
+      return {
+        level: inputs[0]?.value || "",
+        school: inputs[1]?.value || "",
+        course: inputs[2]?.value || "",
+        year: inputs[3]?.value || "",
+      };
+    });
+
+    // References as array of objects
+    data.references = Array.from(
+      document.querySelectorAll(".ref-row")
+    ).map((r) => {
+      const inputs = r.querySelectorAll("input");
+      return {
+        name: inputs[0]?.value || "",
+        position: inputs[1]?.value || "",
+        contact: inputs[2]?.value || "",
+      };
+    });
+
+    data.submittedAt = new Date().toISOString();
+
+    try {
+      await addDoc(collection(db, "applications"), data);
+      /*alert("Application submitted successfully!");
+    form.reset();*/
+      window.location.href = "thankyou.html";
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert("Failed to submit. Please check your connection and try again.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Application";
+    }
+  });
+
+  // 6. Add Education Row + autosave
+  document.getElementById("addEdu")?.addEventListener("click", async function () {
+    const wrap = document.getElementById("educationWrap");
+    const row = document.createElement("div");
+    row.className = "edu-row";
+    row.innerHTML = `
+      <input name="eduLevel[]" placeholder="Level">
+      <input name="eduSchool[]" placeholder="School">
+      <input name="eduCourse[]" placeholder="Course / Strand">
+      <input name="eduYear[]" placeholder="Year Graduated">
+    `;
+    wrap.appendChild(row);
+
+    try {
+      await autosaveData();
+      showSaveFeedback(this, "✅ Education Saved");
+    } catch (e) {
+      console.error("Education auto‑save failed:", e);
+    }
+  });
+
+  // 7. Add Reference Row + autosave
+  document.getElementById("addRef")?.addEventListener("click", async function () {
+    const wrap = document.getElementById("refsWrap");
+    const row = document.createElement("div");
+    row.className = "ref-row";
+    row.innerHTML = `
+      <input name="refName[]" placeholder="Name">
+      <input name="refPosition[]" placeholder="Position">
+      <input name="refContact[]" placeholder="Contact Number">
+    `;
+    wrap.appendChild(row);
+
+    try {
+      await autosaveData();
+      showSaveFeedback(this, "✅ Reference Saved");
+    } catch (e) {
+      console.error("Reference auto‑save failed:", e);
+    }
+  });
+
+  // Save‑feedback helper
+  function showSaveFeedback(button, message) {
+    const originalText = button.textContent;
+    const originalBg = button.style.background;
+
+    button.textContent = message;
+    button.style.background = "#10b981";
+    button.style.color = "white";
+
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.style.background = originalBg;
+      button.style.color = "";
+    }, 1500);
+  }
+
+  // 8. Auto‑calculate Age from DOB
+  const dobInput = document.querySelector('input[name="dob"]');
+  const ageInput = document.querySelector('input[name="age"]');
+
+  dobInput?.addEventListener("change", function () {
+    const dob = new Date(this.value);
+    if (isNaN(dob.getTime())) return;
+
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    const dayDiff = today.getDate() - dob.getDate();
+
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    if (ageInput) {
+      ageInput.value = Math.max(age, 0).toString();
+    }
+  });
+</script>
+</body>
+</html>

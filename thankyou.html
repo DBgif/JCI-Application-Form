@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank You | Contact Form</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+      background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+      animation: fadeIn 0.6s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .container {
+      background: #f9fafc;
+      padding: 36px 32px;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(15, 82, 186, 0.12), 0 0 0 1px #e0e7ff;
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid #e0e7ff;
+      animation: slideUp 0.4s ease-out 0.1s backwards;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .icon {
+      color: #fbbf24;
+      font-size: 52px;
+      margin-bottom: 12px;
+      animation: bounce 0.6s ease-in-out;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    h1 {
+      color: #1d4ed8;
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #4b5563;
+      font-size: 15px;
+      line-height: 1.56;
+      margin-bottom: 20px;
+    }
+    .details {
+      background: #eff6ff;
+      padding: 16px;
+      border-radius: 12px;
+      margin: 16px 0 16px;
+      font-size: 13px;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      text-align: left;
+      border-left: 4px solid #fbbf24; /* yellow accent stripe */
+    }
+    .detail-item {
+      margin: 6px 0 0 0;
+    }
+    .detail-item strong {
+      color: #0284c7;
+    }
+    .buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .link {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #1d4ed8;
+      color: white;
+      text-decoration: none;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 500;
+      min-width: 150px;
+      transition: background 0.24s ease, transform 0.12s ease;
+      box-shadow: 0 2px 4px rgba(15, 82, 186, 0.12);
+    }
+    .link:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(15, 82, 186, 0.16);
+    }
+    .link:active {
+      transform: translateY(0);
+    }
+    .link-secondary {
+      background: transparent;
+      color: #0284c7;
+      border: 1.5px solid #0284c7;
+    }
+    .link-secondary:hover {
+      background: #f0f9ff;
+    }
+    .link-yellow-outline {
+      background: transparent;
+      color: #b91c1c;
+      border: 1.8px solid #fbbf24;
+    }
+    .link-yellow-outline:hover {
+      background: #fde68a;
+      color: #111827;
+      border-color: #fbbf24;
+    }
+    .footer-note {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">✅</div>
+    <h1>Thank you!</h1>
+    <p>
+      Your response has been successfully submitted and saved. We appreciate your time and feedback.
+    </p>
+
+    <div class="buttons">
+    
+      <a href="#" class="link link-secondary">Go to Website</a>
+    </div>
+
+    <div class="footer-note">
+      Need help? <a href="mailto:support@yourcompany.com" style="color: #0284c7; text-decoration: underline;">Contact support</a>
+    </div>
+  </div>
+</body>
+</html>

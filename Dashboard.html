@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JCI Applicant Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --accent: #0f4c81;
+      --accent2: #1d6fa5;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8a5be1;
+      --shadow: 0 10px 25px rgba(0,0,0,.08);
+      --shadow-hover: 0 20px 40px rgba(0,0,0,.12);
+      --live-dot: #10b981;
+    }
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .dashboard {
+      min-height: 100vh;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .header {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+      position: relative;
+      overflow: hidden;
+    }
+    .live-indicator {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 12px;
+      height: 12px;
+      background: var(--live-dot);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 0 0 rgba(16,185,129,.4);
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16,185,129,.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border: 2px solid var(--line);
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all .2s;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 4px rgba(29,111,165,.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+    select, button {
+      padding: 12px 20px;
+      border: 2px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    button {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    .applicants-grid {
+      display: grid;
+      gap: 20px;
+    }
+    .applicant-card {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: all .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .applicant-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--accent);
+    }
+    .applicant-card.live-draft {
+      border-color: var(--live-dot);
+      box-shadow: 0 0 0 4px rgba(16,185,129,.15);
+    }
+    .live-dot {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 10px;
+      height: 10px;
+      background: var(--live-dot);
+      border-radius: 50%;
+      border: 2px solid var(--card);
+      animation: pulse-mini 1.5s infinite;
+    }
+    @keyframes pulse-mini {
+      0%, 80%, 100% { transform: scale(0); opacity: 1; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .applicant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--line);
+    }
+    .applicant-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 0;
+    }
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-new { background: #dbeafe; color: var(--accent); }
+    .status-reviewed { background: #fef3c7; color: var(--warning); }
+    .status-approved { background: #d1fae5; color: var(--success); }
+    .status-draft { background: #d1fae5; color: var(--live-dot); font-weight: 700; }
+    .applicant-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .meta-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+    }
+    .icon-age { background: var(--accent); }
+    .icon-school { background: var(--purple); }
+    .icon-job { background: var(--success); }
+    .summary {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .summary-item {
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .actions {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+    }
+    .action-btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-view { background: var(--accent); color: white; }
+    .btn-edit { background: var(--warning); color: white; }
+    .btn-delete { background: var(--danger); color: white; }
+    .no-data {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: .5;
+    }
+    @media (max-width: 768px) {
+      .dashboard { padding: 12px; }
+      .header { padding: 20px; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .search-box { min-width: auto; }
+      .applicant-header { flex-direction: column; gap: 12px; }
+      .actions { position: static; justify-content: center; margin-top: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="header">
+      <div class="live-indicator" id="liveIndicator"></div>
+      <h1>JCI Applicant Dashboard</h1>
+      <p style="margin: 0; color: var(--muted);">Live updates from form autosaves • <span id="lastUpdate">Loading...</span></p>
+      
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number" id="totalApplicants">0</div>
+          <div>Total Applicants</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+          <div class="stat-number" id="newApplicants">0</div>
+          <div>Live Drafts</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+          <div class="stat-number" id="pendingReview">0</div>
+          <div>Pending Review</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+          <div class="stat-number" id="approved">0</div>
+          <div>Approved</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search applicants by name, email, or organization...">
+      </div>
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option value="draft">Live Draft</option>
+        <option value="new">New</option>
+        <option value="reviewed">Reviewed</option>
+        <option value="approved">Approved</option>
+      </select>
+      <select id="employmentFilter">
+        <option value="">All Employment</option>
+        <option value="Student">Students</option>
+        <option value="Employed">Employed</option>
+        <option value="Self-Employed">Self-Employed</option>
+      </select>
+      <button onclick="exportData()">📊 Export Data</button>
+    </div>
+
+    <div class="applicants-grid" id="applicantsGrid">
+      <!-- Dynamic content populated by Firebase -->
+    </div>
+  </div>
+
+  <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, doc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+    // Firebase config (same as form)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDo8zyDjgqzR9bvGXVDLKgMu7qZldBDFUU",
+      authDomain: "contact-4e3df.firebaseapp.com",
+      projectId: "contact-4e3df",
+      storageBucket: "contact-4e3df.firebasestorage.app",
+      messagingSenderId: "869674483397",
+      appId: "1:869674483397:web:4abc3057f810328ae03aac",
+      measurementId: "G-ZRV7EWGH0K"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    // State
+    let applicants = [];
+    let unsubscribe = null;
+
+    // Initialize dashboard with real-time Firebase listener
+    document.addEventListener('DOMContentLoaded', function() {
+      initRealtimeListener();
+      setupFilters();
+    });
+
+    function initRealtimeListener() {
+      // Listen to BOTH collections: live drafts AND submitted applications
+      const applicationsQuery = query(collection(db, "applications"), orderBy("submittedAt", "desc"));
+      const draftQuery = query(collection(db, "applicants"), orderBy("__name__", "desc")); // current_draft has doc ID "current_draft"
+
+      // Listen to submitted applications
+      onSnapshot(applicationsQuery, (snapshot) => {
+        const submittedApps = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          docType: 'submitted',
+          status: 'new', // Default for new submissions
+          dateApplied: doc.data().submittedAt || new Date().toISOString()
+        }));
+        
+        updateApplicantsList(submittedApps, 'applications');
+      });
+
+      // Listen to live draft (current_draft document)
+      onSnapshot(doc(db, "applicants", "current_draft"), (docSnap) => {
+        if (docSnap.exists()) {
+          const draftData = docSnap.data();
+          const draftApp = {
+            id: `draft-${Date.now()}`,
+            ...draftData,
+            docType: 'draft',
+            status: 'draft',
+            dateApplied: new Date().toISOString(),
+            isLive: true
+          };
+          
+          // Replace any existing draft
+          applicants = applicants.filter(a => a.docType !== 'draft');
+          applicants.unshift(draftApp);
+          renderDashboard();
+          updateLiveIndicator(true);
+        } else {
+          // Remove draft if it doesn't exist
+          applicants = applicants.filter(a => a.docType !== 'draft');
+          renderDashboard();
+          updateLiveIndicator(false);
+        }
+      }, (error) => {
+        console.error("Draft listener error:", error);
+      });
+    }
+
+    function updateApplicantsList(newApps, source) {
+      applicants = applicants.filter(a => a.docType !== 'submitted' || source !== 'applications');
+      applicants.push(...newApps);
+      renderDashboard();
+    }
+
+    function renderDashboard(filteredApplicants = applicants) {
+      const grid = document.getElementById('applicantsGrid');
+      
+      if (filteredApplicants.length === 0) {
+        grid.innerHTML = `
+          <div class="applicant-card no-data">
+            <div class="empty-state-icon">📋</div>
+            <h3>No applicants found</h3>
+            <p>Try adjusting your search or filter criteria. Live form data will appear here automatically.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filteredApplicants.map(applicant => `
+        <div class="applicant-card ${applicant.status === 'draft' ? 'live-draft' : ''}" data-id="${applicant.id}">
+          ${applicant.status === 'draft' ? '<div class="live-dot" title="Live form input detected"></div>' : ''}
+          
+          <div class="actions">
+            <button class="action-btn btn-view" onclick="viewApplicant('${applicant.id}')">👁️ View</button>
+            <button class="action-btn btn-edit" onclick="editStatus('${applicant.id}', '${applicant.status}')">✏️ ${applicant.status === 'draft' ? 'Submit' : 'Edit'}</button>
+            <button class="action-btn btn-delete" onclick="deleteApplicant('${applicant.id}')">🗑️ Delete</button>
+          </div>
+          
+          <div class="applicant-header">
+            <div>
+              <h2 class="applicant-name">${applicant.fullName || applicant.name || 'Unnamed Applicant'}</h2>
+              <span class="status-badge status-${applicant.status}">${applicant.status.toUpperCase()}${applicant.status === 'draft' ? ' (LIVE)' : ''}</span>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 13px; color: var(--muted);">
+                ${applicant.status === 'draft' ? 'Drafting now...' : `Applied: ${new Date(applicant.dateApplied || applicant.submittedAt).toLocaleDateString('en-PH')}`}
+              </div>
+            </div>
+          </div>
+
+          <div class="applicant-meta">
+            <div class="meta-item">
+              <div class="meta-icon icon-age">${applicant.age || '?'}</div>
+              <span>${applicant.age || '?'} years old</span>
+            </div>
+            <div class="meta-item">
+              <div class="meta-icon icon-school">🎓</div>
+              <span>${getEducationSummary(applicant)}</span>
+            </div>
+            <div class="meta-item">
+              <div class="meta-icon icon-job">💼</div>
+              <span>${applicant.employmentStatus || applicant.employmentStatus || 'N/A'} • ${applicant.occupation || 'N/A'}</span>
+            </div>
+          </div>
+
+          <div class="summary">
+            <div class="summary-item">📧 ${applicant.email || 'No email'}</div>
+            <div class="summary-item">🏢 ${applicant.company || applicant.organization || 'N/A'}</div>
+          </div>
+        </div>
+      `).join('');
+
+      updateStats();
+    }
+
+    function getEducationSummary(applicant) {
+      if (applicant['eduLevel[]'] || applicant.eduLevel) {
+        const level = applicant['eduLevel[]'] || applicant.eduLevel || '';
+        const school = applicant['eduSchool[]'] || applicant.eduSchool || '';
+        return `${level} - ${school}`.trim() || 'No education data';
+      }
+      return applicant.education || 'No education data';
+    }
+
+    function updateStats() {
+      const total = applicants.length;
+      const drafts = applicants.filter(a => a.status === 'draft').length;
+      const pending = applicants.filter(a => a.status === 'new' || a.status === 'reviewed').length;
+      const approved = applicants.filter(a => a.status === 'approved').length;
+
+      document.getElementById('totalApplicants').textContent = total;
+      document.getElementById('newApplicants').textContent = drafts;
+      document.getElementById('pendingReview').textContent = pending;
+      document.getElementById('approved').textContent = approved;
+      document.getElementById('lastUpdate').textContent = `Last update: ${new Date().toLocaleTimeString('en-PH')}`;
+    }
+
+    function updateLiveIndicator(hasLiveDraft) {
+      const indicator = document.getElementById('liveIndicator');
+      indicator.style.opacity = hasLiveDraft ? '1' : '0.3';
+    }
+
+    function setupFilters() {
+      document.getElementById('searchInput').addEventListener('input', debounce(filterApplicants, 300));
+      document.getElementById('statusFilter').addEventListener('change', filterApplicants);
+      document.getElementById('employmentFilter').addEventListener('change', filterApplicants);
+    }
+
+    function filterApplicants() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const employmentFilter = document.getElementById('employmentFilter').value;
+
+      let filtered = applicants.filter(applicant => {
+        const name = (applicant.fullName || applicant.name || '').toLowerCase();
+        const email = (applicant.email || '').toLowerCase();
+        const company = (applicant.company || applicant.organization || '').toLowerCase();
+        
+        const matchesSearch = !search || name.includes(search) || email.includes(search) || company.includes(search);
+        const matchesStatus = !statusFilter || applicant.status === statusFilter;
+        const matchesEmployment = !employmentFilter || 
+          (applicant.employmentStatus || applicant.employment || '').includes(employmentFilter);
+        
+        return matchesSearch && matchesStatus && matchesEmployment;
+      });
+
+      renderDashboard(filtered);
+    }
+
+    // Utility: debounce function
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // View applicant (same as before but uses real data)
+    window.viewApplicant = function(id) {
+      const applicant = applicants.find(a => a.id === id);
+      if (applicant) {
+        const profileHTML = generateProfileHTML(applicant);
+        const profileWindow = window.open('', '_blank', 'width=950,height=800,scrollbars=yes,resizable=yes');
+        profileWindow.document.write(profileHTML);
+        profileWindow.document.close();
+      }
+    };
+
+    window.editStatus = function(id, currentStatus) {
+      const newStatus = prompt('New status (new/reviewed/approved):', currentStatus);
+      if (newStatus && ['new', 'reviewed', 'approved'].includes(newStatus)) {
+        // Update in Firestore
+        const applicantDoc = applicants.find(a => a.id === id);
+        if (applicantDoc.docType === 'submitted') {
+          // TODO: Implement status update in Firestore
+          alert(`Status updated to ${newStatus} (Firestore update pending)`);
+        } else {
+          alert('Draft will be converted to application on final submit');
+        }
+      }
+    };
+
+    window.deleteApplicant = function(id) {
+      if (confirm('Delete this applicant?')) {
+        const applicant = applicants.find(a => a.id === id);
+        if (applicant.docType === 'submitted') {
+          // deleteDoc(doc(db, "applications", applicant.id));
+          alert('Submitted app deleted from Firestore');
+        }
+        // Filter out from local state
+        applicants = applicants.filter(a => a.id !== id);
+        renderDashboard();
+      }
+    };
+
+    window.exportData = function() {
+      const exportData = applicants.map(a => ({ ...a, exportTime: new Date().toISOString() }));
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `jci-applicants-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+    };
+
+    function generateProfileHTML(applicant) {
+  // EXACT form field mappings
+  function getValue(obj, keys) {
+    for (let key of keys) {
+      if (obj && obj[key] !== undefined) return obj[key];
+    }
+    return '';
+  }
+
+  const fullName = getValue(applicant, ['fullName']) || 'Unnamed Applicant';
+  const nickname = getValue(applicant, ['nickname']) || '';
+  const age = getValue(applicant, ['age']) || '';
+  const gender = getValue(applicant, ['gender']) || '';
+  const birthday = getValue(applicant, ['dob', 'birthday', 'birthDate']) || '';
+  const birthplace = getValue(applicant, ['birthplace', 'birthPlace']) || '';
+  const civilStatus = getValue(applicant, ['civilStatus']) || '';
+  const nationality = getValue(applicant, ['nationality']) || '';
+  const employmentStatus = getValue(applicant, ['employmentStatus']) || '';
+  const occupation = getValue(applicant, ['occupation']) || '';
+  const company = getValue(applicant, ['company', 'businessName', 'organization']) || '';
+  const position = getValue(applicant, ['currentRole', 'position', 'role']) || '';
+  const yearsInProfession = getValue(applicant, ['yearsInProfession']) || '';
+  const address = getValue(applicant, ['address']) || '';
+  const phone = getValue(applicant, ['mobile', 'phone', 'contactNumber']) || '';
+  const email = getValue(applicant, ['email']) || '';
+  const fbLink = getValue(applicant, ['fbLink', 'messengerLink', 'socialLink']) || '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JCI Applicant Profile - ${fullName}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border: 3px solid #8a5be1;
+      padding: 20px;
+      position: relative;
+    }
+    .status-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: #d1fae5;
+      color: #10b981;
+    }
+    .top {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .photo {
+      width: 180px;
+      height: 180px;
+      background: #ddd;
+      border: 1px solid #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      font-size: 48px;
+    }
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .details p, .section p {
+      margin: 8px 0;
+      font-size: 15px;
+    }
+    .label {
+      font-weight: bold;
+      display: inline-block;
+      min-width: 180px;
+      color: #8a5be1;
+    }
+    .value {
+      min-height: 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .section {
+      margin-top: 20px;
+    }
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      color: #8a5be1;
+      border-bottom: 2px solid #8a5be1;
+      padding-bottom: 5px;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .card { border: none; max-width: 100%; }
+      .status-badge { display: none; }
+    }
+    @media (max-width: 768px) {
+      .top { flex-direction: column; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="status-badge status-${applicant.status || 'new'}">${(applicant.status || 'new').toUpperCase()}${applicant.status === 'draft' ? ' (LIVE)' : ''}</div>
+    
+    <div class="top">
+      <div class="photo">👤</div>
+      <div class="details">
+        <p><span class="label">Name:</span> <span class="value">${fullName}</span></p>
+        <p><span class="label">Address:</span> <span class="value">${address}</span></p>
+        <p><span class="label">Contact Number:</span> <span class="value">${phone}</span></p>
+        <p><span class="label">Email Address:</span> <span class="value">${email}</span></p>
+        <p><span class="label">FB/Messenger Link:</span> <span class="value"><a href="${fbLink}" target="_blank">${fbLink || 'N/A'}</a></span></p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="section">
+        <h2>Personal Information</h2>
+        <p><span class="label">Nickname:</span> <span class="value">${nickname}</span></p>
+        <p><span class="label">Age:</span> <span class="value">${age}</span></p>
+        <p><span class="label">Gender:</span> <span class="value">${gender}</span></p>
+        <p><span class="label">Birthday:</span> <span class="value">${birthday}</span></p>
+        <p><span class="label">Birthplace:</span> <span class="value">${birthplace || 'N/A'}</span></p>
+        <p><span class="label">Civil Status:</span> <span class="value">${civilStatus}</span></p>
+        <p><span class="label">Nationality:</span> <span class="value">${nationality}</span></p>
+      </div>
+
+      <div class="section">
+        <h2>Current Status</h2>
+        <p><span class="label">Employment Status:</span> <span class="value">${employmentStatus}</span></p>
+        <p><span class="label">Profession / Occupation:</span> <span class="value">${occupation}</span></p>
+        <p><span class="label">Company / Organization:</span> <span class="value">${company}</span></p>
+        <p><span class="label">Position / Role:</span> <span class="value">${position}</span></p>
+        <p><span class="label">Years in Profession:</span> <span class="value">${yearsInProfession}</span></p>
+      </div>
+    </div>
+
+    ${applicant.status === 'draft' ? `
+    <div style="margin-top: 30px; padding: 15px; background: #fef3c7; border-radius: 8px; font-size: 14px; color: #92400e;">
+      <strong>🔴 LIVE DRAFT MODE</strong><br>
+      This applicant is currently filling out the form. Data updates in real-time.
+    </div>
+    ` : ''}
+  </div>
+</body>
+</html>`;
+
+    }
+
+    // Expose for form integration
+    window.importFormData = function(formData) {
+      console.log('Form submitted:', formData);
+    };
+  </script>
+</body>
+</html>

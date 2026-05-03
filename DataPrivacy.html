@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Form | Start Here</title>
+  <!-- Load the reCAPTCHA API -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      background: linear-gradient(135deg, #e6f3ff 0%, #f8f9fa 100%); 
+      min-height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px; 
+      color: #2c3e50; 
+    }
+    .container { 
+      background: white; 
+      padding: 36px; 
+      border-radius: 20px; 
+      box-shadow: 0 12px 32px rgba(0, 74, 150, 0.12), 0 1px 3px rgba(0, 0, 0, 0.1); 
+      max-width: 600px; 
+      width: 100%; 
+      text-align: center; 
+      border-top: 6px solid #0074e9; 
+    }
+    h1 { 
+      font-size: 28px; 
+      color: #0074e9; 
+      margin-bottom: 8px; 
+      font-weight: 600; 
+    }
+    p { 
+      color: #555; 
+      font-size: 15px; 
+      margin-bottom: 24px; 
+    }
+    .btn-primary { 
+      display: inline-block; 
+      padding: 13px 28px; 
+      background: linear-gradient(135deg, #0074e9 0%, #003ba9 100%); 
+      color: white; 
+      text-decoration: none; 
+      border-radius: 14px; 
+      font-size: 15px; 
+      font-weight: 500; 
+      margin-top: 8px; 
+      border: none; 
+      box-shadow: 0 4px 12px rgba(0, 116, 233, 0.25); 
+      transition: transform 0.15s ease, box-shadow 0.15s ease; 
+      cursor: pointer; 
+    }
+    .btn-primary:hover { 
+      transform: translateY(-1px); 
+      box-shadow: 0 6px 16px rgba(0, 116, 233, 0.35); 
+    }
+    .privacy-notice { 
+      margin-top: 28px; 
+      padding: 18px; 
+      background: linear-gradient(0deg, #ffffff, #f8fbff); 
+      border: 1px solid #b0ddf9; 
+      border-radius: 12px; 
+      font-size: 13px; 
+      color: #374151; 
+      line-height: 1.55; 
+      text-align: left; 
+    }
+    .privacy-notice h3 { 
+      font-size: 14px; 
+      font-weight: 600; 
+      color: #0074e9; 
+      margin-bottom: 6px; 
+    }
+    .highlight-yellow { 
+      color: #d4a017; 
+      font-weight: 600; 
+    }
+    #recaptcha-container { 
+      display: none; 
+      margin-top: 20px; 
+      justify-content: center;
+    }
+    .show-recaptcha { 
+      display: flex !important; 
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Contact Form</h1>
+  <p>Please fill out the form to send your details.</p>
+
+  <!-- Button to trigger reCAPTCHA -->
+  <button id="form-btn" class="btn-primary" onclick="showRecaptcha()">Fill Out the Form</button>
+
+  <!-- reCAPTCHA widget (replace YOUR_SITE_KEY with your actual key) -->
+  <div
+    id="recaptcha-container"
+    class="g-recaptcha"
+    data-sitekey="YOUR_SITE_KEY"
+    data-callback="onRecaptchaVerified"
+  ></div>
+
+  <!-- Data Privacy Notice -->
+  <div class="privacy-notice">
+    <p>Under the <strong>Data Privacy Act of 2012 (RA 10173)</strong>, you have rights to be informed, access, correct, delete/block, object, damages, and lodge complaints with the National Privacy Commission (NPC). Contact us at <span class="highlight-yellow">dc7775980@gmail.com</span> to exercise these rights.</p>
+    <h3>Data Privacy Notice (JCI Imus Wagayway)</h3>
+    <p>This form collects your personal information (name, address, phone number, email, age, birthday, gender) solely for JCI Imus Wagayway event registration and related communications. Data is stored securely in an encrypted database and retained only as necessary.</p>
+  </div>
+</div>
+
+<script>
+  // Function to reveal reCAPTCHA and hide button
+  function showRecaptcha() {
+    document.getElementById("recaptcha-container").classList.add("show-recaptcha");
+    document.getElementById("form-btn").style.display = "none";
+  }
+
+  // Callback function executed after successful reCAPTCHA
+  function onRecaptchaVerified(token) {
+    // You can handle the token here or just redirect
+    console.log("reCAPTCHA Token:", token);
+    alert("Verification successful! Proceeding to the form...");
+    window.location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>
